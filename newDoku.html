@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>My First Heading</h1>
+    <div id="demo">demush</div>
+  </body>
+  <script>
+    const BorderSize = 9;
+    const sqrtBorderSize = Math.sqrt(BorderSize);
+    let board = [];
+    let divush;
+
+    
+    const setColID = (i) => {
+      if (i < BorderSize + 1) {
+        return Math.ceil(i / sqrtBorderSize);
+      } else {
+        return setColID(i - BorderSize);
+      }
+    };
+
+    const createVals = (b) => {
+      let vals = [
+        { i: 3, val: 7 },
+        { i: 6, val: 6 },
+        { i: 7, val: 8 },
+        { i: 9, val: 2 },
+        { i: 13, val: 2 },
+        { i: 15, val: 8 },
+        { i: 16, val: 7 },
+        { i: 19, val: 2 },
+        { i: 20, val: 8 },
+        { i: 24, val: 3 },
+        { i: 25, val: 1 },
+        { i: 27, val: 6 },
+        { i: 28, val: 6 },
+        { i: 29, val: 7 },
+        { i: 30, val: 2 },
+        { i: 31, val: 5 },
+        { i: 34, val: 9 },
+        { i: 38, val: 4 },
+        { i: 39, val: 9 },
+        { i: 40, val: 8 },
+        { i: 43, val: 6 },
+        { i: 47, val: 3 },
+        { i: 48, val: 1 },
+        { i: 50, val: 4 },
+        { i: 51, val: 9 },
+        { i: 53, val: 5 },
+        { i: 56, val: 1 },
+        { i: 58, val: 9 },
+        { i: 61, val: 3 },
+        { i: 62, val: 7 },
+        { i: 63, val: 8 },
+        { i: 65, val: 6 },
+        { i: 66, val: 3 },
+        { i: 69, val: 5 },
+        { i: 71, val: 2 },
+        { i: 73, val: 9 },
+        { i: 76, val: 3 },
+        { i: 79, val: 5 },
+      ];
+      console.log("j", vals.length);
+      for (let j = 0; j <= vals.length - 1; j++) {
+        if (b.cell == vals[j].i) {
+          b.val = vals[j].val;
+        }
+      }
+    };
+
+    // const createCellPossibilities = (cellData) => {
+      // let possible = [];
+      // console.log("cd", cellData);
+      // for (let i = 0; i < BorderSize; i++) {
+        // possible[i] = i + 1;
+        // if (cellData.val && cellData.val === i + 1) {
+          // possible.splice(i, 1);
+        // }
+      // }
+      // return possible;
+    // };
+
+
+    const createCellPossibilities = (brd) => {
+      brd.map((singleCell) => {
+        for (let i = 0; i < BorderSize; i++) {
+          if (singleCell.val != i+1) {
+            let valsInCube;
+            let valsInRow;
+            let valsInCol;
+            singleCell.possibilities[i] = i+1;
+          }
+          // console.log("brd", brd[i])
+        }
+
+
+      })
+    }
+
+
+    const createBorders = (i) => {
+      let rowID = Math.ceil(i / (BorderSize * sqrtBorderSize));
+      let colID = setColID(i);
+      let cubeID = sqrtBorderSize * (rowID - 1) + colID;
+      board[i] = { cell: i, colID: colID, rowID: rowID, cubeID: cubeID, possibilities: [] };
+      createVals(board[i]);
+     
+      let isThirdRow = Math.ceil(i / BorderSize) % sqrtBorderSize == 0;
+
+      let isTopColl = i < BorderSize + 1;
+      let isRightColl = i % sqrtBorderSize == 0;
+      let isBottomColl = isThirdRow;
+      let isLeftColl = (i - 1) % BorderSize == 0 || i == 1;
+
+      let topBorderCell = isTopColl ? "20px" : "1px";
+      let rightBorderCell = isRightColl ? "20px" : "1px";
+      let bottomBorderCell = isBottomColl ? "20px" : "1px";
+      let leftBorderCell = isLeftColl ? "20px" : "1px";
+      return {
+        borderWidth: `${topBorderCell} ${rightBorderCell} ${bottomBorderCell} ${leftBorderCell}`,
+        borderColor: "pink",
+        colText: i,
+        // `i: ${i} colID: ${colID} rowID: ${rowID} cubeID: ${cubeID}`
+        // `${isThirdRow || isRightColl || ? "pink" : "black"}`
+      };
+    };
+
+    for (let i = 1; i < BorderSize * BorderSize + 1; i++) {
+      let fstOrDividedBy9 = (i - 1) % BorderSize == 0 || i == 1;
+      let { borderWidth, borderColor, colText } = createBorders(i);
+      colText = board[i].val ? board[i].val : 0;
+      if (fstOrDividedBy9) {
+        divush = document.createElement("div");
+        divush.id = `divush${(i - 1) / BorderSize}`;
+      }
+
+      let spanush = document.createElement("span");
+      spanush.classList.add(`cell${i}`);
+      spanush.style.borderWidth = borderWidth;
+      spanush.style.borderStyle = "solid";
+      spanush.style.borderColor = borderColor;
+
+      // spanush.style.border = "5px solid pink";
+      spanush.style.width = "73px";
+      spanush.style.height = "73px";
+      spanush.style.display = "inline-block";
+      spanush.style.margin = "0px";
+      spanush.textContent = colText;
+      spanush.style.color = board[i].val ? "black" : "yellow";
+      divush.appendChild(spanush);
+      if (fstOrDividedBy9) {
+        document.body.appendChild(divush); // or any other parent element
+      }
+    }
+    createCellPossibilities(board);
+    console.log("board", board);
+
+    document.getElementById("demo").style.backgroundColor = "red";
+  </script>
+</html>
