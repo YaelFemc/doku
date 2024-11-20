@@ -10,11 +10,12 @@
     let board = [];
     let divush;
 
-    
     const setColID = (i) => {
-      if (i < BorderSize + 1) {
-        return Math.ceil(i / sqrtBorderSize);
-      } else {
+      console.log("i", i)
+      if (i <= BorderSize) {
+        return i
+      } 
+      else {
         return setColID(i - BorderSize);
       }
     };
@@ -90,7 +91,6 @@
             let valsInCol;
             singleCell.possibilities[i] = i+1;
           }
-          // console.log("brd", brd[i])
         }
 
 
@@ -99,10 +99,11 @@
 
 
     const createBorders = (i) => {
-      let rowID = Math.ceil(i / (BorderSize * sqrtBorderSize));
+      let rowID = Math.ceil(i / BorderSize);
       let colID = setColID(i);
-      let cubeID = sqrtBorderSize * (rowID - 1) + colID;
+      let cubeID = (sqrtBorderSize * (Math.ceil(rowID / 3) - 1)) + Math.ceil(colID / 3);
       board[i] = { cell: i, colID: colID, rowID: rowID, cubeID: cubeID, possibilities: [] };
+      console.log('creatreBorders board', board[i])
       createVals(board[i]);
      
       let isThirdRow = Math.ceil(i / BorderSize) % sqrtBorderSize == 0;
@@ -128,7 +129,7 @@
     for (let i = 1; i < BorderSize * BorderSize + 1; i++) {
       let fstOrDividedBy9 = (i - 1) % BorderSize == 0 || i == 1;
       let { borderWidth, borderColor, colText } = createBorders(i);
-      colText = board[i].val ? board[i].val : 0;
+      // colText = board[i].val ? board[i].val : 0;
       if (fstOrDividedBy9) {
         divush = document.createElement("div");
         divush.id = `divush${(i - 1) / BorderSize}`;
@@ -146,7 +147,7 @@
       spanush.style.display = "inline-block";
       spanush.style.margin = "0px";
       spanush.textContent = colText;
-      spanush.style.color = board[i].val ? "black" : "yellow";
+      // spanush.style.color = board[i].val ? "black" : "yellow";
       divush.appendChild(spanush);
       if (fstOrDividedBy9) {
         document.body.appendChild(divush); // or any other parent element
