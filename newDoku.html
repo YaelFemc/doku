@@ -11,7 +11,6 @@
     let divush;
 
     const setColID = (i) => {
-      console.log("i", i)
       if (i <= BorderSize) {
         return i
       } 
@@ -21,47 +20,47 @@
     };
 
     const createVals = (b) => {
-      let vals = [
-        { i: 3, val: 7 },
-        { i: 6, val: 6 },
-        { i: 7, val: 8 },
-        { i: 9, val: 2 },
-        { i: 13, val: 2 },
-        { i: 15, val: 8 },
-        { i: 16, val: 7 },
-        { i: 19, val: 2 },
-        { i: 20, val: 8 },
-        { i: 24, val: 3 },
-        { i: 25, val: 1 },
-        { i: 27, val: 6 },
-        { i: 28, val: 6 },
-        { i: 29, val: 7 },
-        { i: 30, val: 2 },
-        { i: 31, val: 5 },
-        { i: 34, val: 9 },
-        { i: 38, val: 4 },
-        { i: 39, val: 9 },
-        { i: 40, val: 8 },
-        { i: 43, val: 6 },
-        { i: 47, val: 3 },
-        { i: 48, val: 1 },
-        { i: 50, val: 4 },
-        { i: 51, val: 9 },
-        { i: 53, val: 5 },
-        { i: 56, val: 1 },
-        { i: 58, val: 9 },
-        { i: 61, val: 3 },
-        { i: 62, val: 7 },
-        { i: 63, val: 8 },
-        { i: 65, val: 6 },
-        { i: 66, val: 3 },
-        { i: 69, val: 5 },
-        { i: 71, val: 2 },
-        { i: 73, val: 9 },
-        { i: 76, val: 3 },
-        { i: 79, val: 5 },
-      ];
-      console.log("j", vals.length);
+      let vals = [{i: 1, val:6}, {i: 4, val:2}, {i: 7, val:9}, {i: 17, val:3}, {i: 18, val:8}, {i: 19, val:1}, {i: 23, val:3}, {i: 27, val:2},{i: 29, val:5}, {i: 31, val:7}, {i: 34, val:1}, {i: 38, val:4}, {i: 41, val:9}, {i: 43, val:8}, {i: 44, val:5}, {i: 47, val:8}, {i: 49, val:3}, {i: 65, val:1}, {i: 69, val:4}, {i: 70, val:2}, {i: 73, val:7}, {i: 76, val:9} , {i: 79, val:5}]
+      // let vals = [
+        // { i: 3, val: 7 },
+        // { i: 6, val: 6 },
+        // { i: 7, val: 8 },
+        // { i: 9, val: 2 },
+        // { i: 13, val: 2 },
+        // { i: 15, val: 8 },
+        // { i: 16, val: 7 },
+        // { i: 19, val: 2 },
+        // { i: 20, val: 8 },
+        // { i: 24, val: 3 },
+        // { i: 25, val: 1 },
+        // { i: 27, val: 6 },
+        // { i: 28, val: 6 },
+        // { i: 29, val: 7 },
+        // { i: 30, val: 2 },
+        // { i: 31, val: 5 },
+        // { i: 34, val: 9 },
+        // { i: 38, val: 4 },
+        // { i: 39, val: 9 },
+        // { i: 40, val: 8 },
+        // { i: 43, val: 6 },
+        // { i: 47, val: 3 },
+        // { i: 48, val: 1 },
+        // { i: 50, val: 4 },
+        // { i: 51, val: 9 },
+        // { i: 53, val: 5 },
+        // { i: 56, val: 1 },
+        // { i: 58, val: 9 },
+        // { i: 61, val: 3 },
+        // { i: 62, val: 7 },
+        // { i: 63, val: 8 },
+        // { i: 65, val: 6 },
+        // { i: 66, val: 3 },
+        // { i: 69, val: 5 },
+        // { i: 71, val: 2 },
+        // { i: 73, val: 9 },
+        // { i: 76, val: 3 },
+        // { i: 79, val: 5 },
+      // ];
       for (let j = 0; j <= vals.length - 1; j++) {
         if (b.cell == vals[j].i) {
           b.val = vals[j].val;
@@ -69,31 +68,52 @@
       }
     };
 
-    // const createCellPossibilities = (cellData) => {
-      // let possible = [];
-      // console.log("cd", cellData);
-      // for (let i = 0; i < BorderSize; i++) {
-        // possible[i] = i + 1;
-        // if (cellData.val && cellData.val === i + 1) {
-          // possible.splice(i, 1);
-        // }
-      // }
-      // return possible;
-    // };
+    const valsPerProp = (brd, ID) => {
+      let prop = {}
+      for (let i = 0; i < BorderSize; i++) {
+        let propVals = brd.filter(cell => cell[ID] == i+1 && ("val" in cell)).map(cell => cell.val)
+        prop[i+1] = propVals
+      }
+      // console.log(ID, prop)
+      return prop
+    }
 
-
+    const reducePossibilities = (possibilities, impossiblePerProp) => {
+      for (let j = 0; j < impossiblePerProp.length; j++) {
+        for (let i = 0; i < possibilities.length; i++) {
+          if (impossiblePerProp[j] === possibilities[i]) {
+            possibilities.splice(i, 1)
+          }            
+        }
+      }
+      return possibilities
+    }
+    
+    
     const createCellPossibilities = (brd) => {
+      let valsInRow = valsPerProp(brd, 'rowID')
+      let valsInCol = valsPerProp(brd, 'colID');
+      let valInCube = valsPerProp(brd, 'cubeID');
       brd.map((singleCell) => {
-        for (let i = 0; i < BorderSize; i++) {
-          if (singleCell.val != i+1) {
-            let valsInCube;
-            let valsInRow;
-            let valsInCol;
+        if (!("val" in singleCell)) {
+          for (let i = 0; i < BorderSize; i++) {
             singleCell.possibilities[i] = i+1;
           }
+        } else {
+          singleCell.possibilities = []
+          
         }
-
-
+        singleCell.possibilities = reducePossibilities(singleCell.possibilities, valsInRow[singleCell.rowID])
+        singleCell.possibilities = reducePossibilities(singleCell.possibilities, valsInCol[singleCell.colID])
+        singleCell.possibilities = reducePossibilities(singleCell.possibilities, valInCube[singleCell.cubeID])
+        // console.log('possibilities', singleCell.possibilities)
+        if (singleCell.possibilities.length == 1) {
+          singleCell.val = singleCell.possibilities[0]
+          let domCell = document.getElementById(`cell${singleCell.cell}`)
+          domCell.innerHTML = singleCell.val
+          domCell.style.color = "red"
+          createCellPossibilities(brd)
+        }
       })
     }
 
@@ -103,7 +123,6 @@
       let colID = setColID(i);
       let cubeID = (sqrtBorderSize * (Math.ceil(rowID / 3) - 1)) + Math.ceil(colID / 3);
       board[i] = { cell: i, colID: colID, rowID: rowID, cubeID: cubeID, possibilities: [] };
-      console.log('creatreBorders board', board[i])
       createVals(board[i]);
      
       let isThirdRow = Math.ceil(i / BorderSize) % sqrtBorderSize == 0;
@@ -121,39 +140,42 @@
         borderWidth: `${topBorderCell} ${rightBorderCell} ${bottomBorderCell} ${leftBorderCell}`,
         borderColor: "pink",
         colText: i,
-        // `i: ${i} colID: ${colID} rowID: ${rowID} cubeID: ${cubeID}`
-        // `${isThirdRow || isRightColl || ? "pink" : "black"}`
       };
     };
 
-    for (let i = 1; i < BorderSize * BorderSize + 1; i++) {
-      let fstOrDividedBy9 = (i - 1) % BorderSize == 0 || i == 1;
-      let { borderWidth, borderColor, colText } = createBorders(i);
-      // colText = board[i].val ? board[i].val : 0;
-      if (fstOrDividedBy9) {
-        divush = document.createElement("div");
-        divush.id = `divush${(i - 1) / BorderSize}`;
-      }
-
-      let spanush = document.createElement("span");
-      spanush.classList.add(`cell${i}`);
-      spanush.style.borderWidth = borderWidth;
-      spanush.style.borderStyle = "solid";
-      spanush.style.borderColor = borderColor;
-
-      // spanush.style.border = "5px solid pink";
-      spanush.style.width = "73px";
-      spanush.style.height = "73px";
-      spanush.style.display = "inline-block";
-      spanush.style.margin = "0px";
-      spanush.textContent = colText;
-      // spanush.style.color = board[i].val ? "black" : "yellow";
-      divush.appendChild(spanush);
-      if (fstOrDividedBy9) {
-        document.body.appendChild(divush); // or any other parent element
+    const drawBoard = () => {  
+      for (let i = 1; i < BorderSize * BorderSize + 1; i++) {
+        let fstOrDividedBy9 = (i - 1) % BorderSize == 0 || i == 1;
+        let { borderWidth, borderColor, colText } = createBorders(i);
+        colText = board[i].val ? board[i].val : 0;
+        if (fstOrDividedBy9) {
+          divush = document.createElement("div");
+          divush.id = `divush${(i - 1) / BorderSize}`;
+        }
+        
+        let spanush = document.createElement("span");
+        // let input = document.createElement("INPUT");
+        spanush.id = `cell${i}`
+        spanush.style.borderWidth = borderWidth;
+        spanush.style.borderStyle = "solid";
+        spanush.style.borderColor = borderColor;
+        
+        // spanush.style.border = "5px solid pink";
+        spanush.style.width = "73px";
+        spanush.style.height = "73px";
+        spanush.style.display = "inline-block";
+        spanush.style.margin = "0px";
+        spanush.textContent = colText;
+        // spanush.style.color = board[i].val ? "black" : "yellow";
+        // spanush.appendChild(input)
+        divush.appendChild(spanush);
+        if (fstOrDividedBy9) {
+          document.body.appendChild(divush); // or any other parent element
+        }
       }
     }
-    createCellPossibilities(board);
+    drawBoard()
+    createCellPossibilities(board); 
     console.log("board", board);
 
     document.getElementById("demo").style.backgroundColor = "red";
