@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <h1>My First Heading</h1>
+    <h1>noa is da queen</h1>
     <div id="demo">demush</div>
   </body>
   <script>
-    const BorderSize = 9;
-    const sqrtBorderSize = Math.sqrt(BorderSize);
+    const BoardSize = 9;
+    const sqrtBoardSize = Math.sqrt(BoardSize);
     let board = [];
     let divush;
 
     const setColID = (i) => {
-      if (i <= BorderSize) {
+      if (i <= BoardSize) {
         return i
       } 
       else {
-        return setColID(i - BorderSize);
+        return setColID(i - BoardSize);
       }
     };
 
@@ -68,14 +68,46 @@
       }
     };
 
-    const valsPerProp = (brd, ID) => {
+    const valsPerProp = (brd, propID) => {
+      // values per cube or row or column
       let prop = {}
-      for (let i = 0; i < BorderSize; i++) {
-        let propVals = brd.filter(cell => cell[ID] == i+1 && ("val" in cell)).map(cell => cell.val)
+      for (let i = 0; i < BoardSize; i++) {
+        let propVals = brd.filter(cell => cell[propID] == i+1 && ("val" in cell)).map(cell => cell.val)
         prop[i+1] = propVals
       }
-      // console.log(ID, prop)
       return prop
+    }
+
+    const updateVal = (singleCell, brd) => {
+          singleCell.val = singleCell.possibilities[0]
+          let domCell = document.getElementById(`cell${singleCell.cell}`)
+          domCell.innerHTML = singleCell.val
+          domCell.style.color = "red"
+          domCell.style.fontSize = "40px"
+          createCellPossibilities(brd)
+    }
+
+    const statistics = (propIds, brd) => {
+      let timesInProp = []
+      for (let j = 0; j < BoardSize; j++) { // 1-9
+        for (let i = 0; i < propIds.length; i++) {
+          let {possibilities, cell, colID, rowID, cubeID} = propIds[i]
+            for (let z = 0; z < possibilities.length; z++) {
+              if (j+1 == possibilities[z]) {
+                timesInProp.push({cellVal: j+1, cell: cell, colID: colID, rowID: rowID, cubeID: cubeID, possibilities: possibilities})
+            } 
+          }
+        }
+
+        let timesInPropLen = timesInProp.length
+        if (timesInPropLen === 1) {
+          let {cell, cellVal} = timesInProp[0]
+            brd[cell].possibilities = [cellVal] 
+            updateVal(brd[cell], brd)
+          }
+
+        timesInProp = []
+      }
     }
 
     const reducePossibilities = (possibilities, impossiblePerProp) => {
@@ -88,15 +120,25 @@
       }
       return possibilities
     }
+
+    const statisticsForAll = (brd) => {
+      for (let i = 0; i < BoardSize; i++) {
+        statistics(brd.filter(cell => cell.colID == i+1), brd)
+        statistics(brd.filter(cell => cell.rowID == i+1), brd)
+        statistics(brd.filter(cell => cell.cubeID == i+1), brd)
+      }
+    }
     
     
     const createCellPossibilities = (brd) => {
-      let valsInRow = valsPerProp(brd, 'rowID')
-      let valsInCol = valsPerProp(brd, 'colID');
-      let valInCube = valsPerProp(brd, 'cubeID');
+      const valsInRow = valsPerProp(brd, 'rowID')
+      const valsInCol = valsPerProp(brd, 'colID');
+      const valInCube = valsPerProp(brd, 'cubeID');
+      // console.log('valInCube', valInCube)
+
       brd.map((singleCell) => {
         if (!("val" in singleCell)) {
-          for (let i = 0; i < BorderSize; i++) {
+          for (let i = 0; i < BoardSize; i++) {
             singleCell.possibilities[i] = i+1;
           }
         } else {
@@ -106,55 +148,81 @@
         singleCell.possibilities = reducePossibilities(singleCell.possibilities, valsInRow[singleCell.rowID])
         singleCell.possibilities = reducePossibilities(singleCell.possibilities, valsInCol[singleCell.colID])
         singleCell.possibilities = reducePossibilities(singleCell.possibilities, valInCube[singleCell.cubeID])
-        // console.log('possibilities', singleCell.possibilities)
         if (singleCell.possibilities.length == 1) {
-          singleCell.val = singleCell.possibilities[0]
-          let domCell = document.getElementById(`cell${singleCell.cell}`)
-          domCell.innerHTML = singleCell.val
-          domCell.style.color = "red"
-          createCellPossibilities(brd)
+          updateVal(singleCell, brd) 
         }
       })
+
+      // statisticsForAll(brd)
+
+      for (let i = 0; i < BoardSize; i++) { // possible vals
+        for (let j = 0; j < BoardSize; j++) { //cubes
+          let cubes = brd.filter(cell => cell.cubeID === j+1)
+          let INTimesInCube = []
+          for (let z = 0; z < BoardSize; z++) {//single cell in cube
+            if (cubes[z].possibilities.includes(i+1)) {
+              INTimesInCube.push(cubes[z])
+            }
+          }
+          let INTimesInCubeLen = INTimesInCube.length
+          if (INTimesInCubeLen > 1) {
+            let {rowID, colID, cubeID} = INTimesInCube[0]
+            if (INTimesInCube.filter(cell => cell.colID === colID).length === INTimesInCubeLen) {
+              // console.log('INTimesInCube col', INTimesInCube, i+1)
+              let cols = brd.filter(cell => cell.colID === colID).filter(cell => (cell.cubeID != cubeID) && (cell.possibilities.includes(i+1)))
+
+              for (let k = 0; k < cols.length; k++) {
+                console.log("666", cols[k])
+                brd[cols[k].cell].possibilities = reducePossibilities(cols[k].possibilities, [i+1])
+              }
+            } else if (INTimesInCube.filter(cell => cell.rowID === rowID).length === INTimesInCubeLen) {
+            }
+            console.log('INTimesInCube row', INTimesInCube, i+1)
+          }
+          INTimesInCube = []
+        }
+      }
+      statisticsForAll(brd)
     }
 
 
     const createBorders = (i) => {
-      let rowID = Math.ceil(i / BorderSize);
+      let rowID = Math.ceil(i / BoardSize);
       let colID = setColID(i);
-      let cubeID = (sqrtBorderSize * (Math.ceil(rowID / 3) - 1)) + Math.ceil(colID / 3);
+      let cubeID = (sqrtBoardSize * (Math.ceil(rowID / 3) - 1)) + Math.ceil(colID / 3);
       board[i] = { cell: i, colID: colID, rowID: rowID, cubeID: cubeID, possibilities: [] };
       createVals(board[i]);
      
-      let isThirdRow = Math.ceil(i / BorderSize) % sqrtBorderSize == 0;
+      let isThirdRow = Math.ceil(i / BoardSize) % sqrtBoardSize == 0;
 
-      let isTopColl = i < BorderSize + 1;
-      let isRightColl = i % sqrtBorderSize == 0;
+      let isTopColl = i < BoardSize + 1;
+      let isRightColl = i % sqrtBoardSize == 0;
       let isBottomColl = isThirdRow;
-      let isLeftColl = (i - 1) % BorderSize == 0 || i == 1;
+      let isLeftColl = (i - 1) % BoardSize == 0 || i == 1;
 
-      let topBorderCell = isTopColl ? "20px" : "1px";
-      let rightBorderCell = isRightColl ? "20px" : "1px";
-      let bottomBorderCell = isBottomColl ? "20px" : "1px";
-      let leftBorderCell = isLeftColl ? "20px" : "1px";
+      let topBorderCell = isTopColl ? "20px" : "5px";
+      let rightBorderCell = isRightColl ? "20px" : "5px";
+      let bottomBorderCell = isBottomColl ? "20px" : "5px";
+      let leftBorderCell = isLeftColl ? "20px" : "5px";
       return {
         borderWidth: `${topBorderCell} ${rightBorderCell} ${bottomBorderCell} ${leftBorderCell}`,
-        borderColor: "pink",
+        borderColor: "purple",
         colText: i,
       };
     };
 
     const drawBoard = () => {  
-      for (let i = 1; i < BorderSize * BorderSize + 1; i++) {
-        let fstOrDividedBy9 = (i - 1) % BorderSize == 0 || i == 1;
+      for (let i = 1; i < BoardSize * BoardSize + 1; i++) {
+        let fstOrDividedBy9 = (i - 1) % BoardSize == 0 || i == 1;
         let { borderWidth, borderColor, colText } = createBorders(i);
         colText = board[i].val ? board[i].val : 0;
         if (fstOrDividedBy9) {
           divush = document.createElement("div");
-          divush.id = `divush${(i - 1) / BorderSize}`;
+          divush.id = `divush${(i - 1) / BoardSize}`;
         }
         
         let spanush = document.createElement("span");
-        // let input = document.createElement("INPUT");
+        let input = document.createElement("INPUT");
         spanush.id = `cell${i}`
         spanush.style.borderWidth = borderWidth;
         spanush.style.borderStyle = "solid";
@@ -165,9 +233,13 @@
         spanush.style.height = "73px";
         spanush.style.display = "inline-block";
         spanush.style.margin = "0px";
+        spanush.style.fontSize = "40px";
         spanush.textContent = colText;
-        // spanush.style.color = board[i].val ? "black" : "yellow";
-        // spanush.appendChild(input)
+        spanush.style.color = board[i].val ? "black" : "white";
+        if (!('val' in board[i])) {
+          input.style.width = "40px"
+          spanush.appendChild(input)
+        }
         divush.appendChild(spanush);
         if (fstOrDividedBy9) {
           document.body.appendChild(divush); // or any other parent element
